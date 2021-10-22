@@ -21,14 +21,15 @@ export async function getServerSideProps(context) {
       notFound: true
     }
   }
-  
-  console.log(data);
 
-  const slug = context.params.city;
+  const hourlyWeather = getHourlyWeather(data.hourly);
 
   return {
     props: {
-      slug: slug,
+      city: city,
+      currentWeather: data.current,
+      dailyWeather: data.daily,
+      hourlyWeather: hourlyWeather,
     },
   };
 }
@@ -38,7 +39,6 @@ const getCity = param => {
   //get the id of the city
   const splitCity = cityParam.split("-")
   const id = splitCity[splitCity.length - 1];
-  console.log(id);
 
   if(!id) {
     return null;
@@ -53,12 +53,31 @@ const getCity = param => {
   }
 };
 
+const getHourlyWeather = (hourlyData) => {
+  const current = new Date();
+  current.setHours(current.getHours(), 0, 0, 0);
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
 
-export default function City({slug}) {
+  // divide by 1000 get timestamps in seconds
+  const currentTimeStamp = Math.floor(current.getTime() / 1000);
+  const tomorrowTimeStamp = Math.floor(tomorrow.getTime() / 1000);
+  
+  const todaysData = hourlyData.filter(data => data.dt < tomorrowTimeStamp);
+
+  return todaysData;
+}
+
+export default function City({ 
+  currentWeather, 
+  dailyWeather, 
+  hourlyWeather, 
+  city,
+}) {
   return (
     <div>
       <h1>City Page</h1>
-      <h2>{slug}</h2>
     </div>
   )
 }
