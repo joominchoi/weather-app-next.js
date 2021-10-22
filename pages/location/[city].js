@@ -1,7 +1,8 @@
 import React from 'react'
 import cities from '../../lib/city.list.json'
 import Head from 'next/head';
-import TodaysWeather from "../../components/TodaysWeather";
+import TodaysWeather from '../../components/TodaysWeather';
+import moment from 'moment-timezone';
 
 export async function getServerSideProps(context) {
   const city = getCity(context.params.city);
@@ -24,11 +25,12 @@ export async function getServerSideProps(context) {
     }
   }
 
-  const hourlyWeather = getHourlyWeather(data.hourly);
+  const hourlyWeather = getHourlyWeather(data.hourly, data.timezone);
 
   return {
     props: {
       city: city,
+      timezone: data.timezone,
       currentWeather: data.current,
       dailyWeather: data.daily,
       hourlyWeather: hourlyWeather,
@@ -55,27 +57,21 @@ const getCity = param => {
   }
 };
 
-const getHourlyWeather = (hourlyData) => {
-  const current = new Date();
-  current.setHours(current.getHours(), 0, 0, 0);
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
+const getHourlyWeather = (hourlyData, timezone) => {
+  const endOfDay = moment().tz(timezone).endOf('day').valueOf();
+  const eodTimeStamp = Math.floor(endOfDay / 1000);
 
-  // divide by 1000 get timestamps in seconds
-  const currentTimeStamp = Math.floor(current.getTime() / 1000);
-  const tomorrowTimeStamp = Math.floor(tomorrow.getTime() / 1000);
-  
-  const todaysData = hourlyData.filter(data => data.dt < tomorrowTimeStamp);
+  const todaysData = hourlyData.filter(data => data.dt < eodTimeStamp);
 
   return todaysData;
 }
 
 export default function City({ 
+  city,
+  timezone,
   currentWeather, 
   dailyWeather, 
   hourlyWeather, 
-  city,
 }) {
   return (
     <div>
@@ -85,7 +81,11 @@ export default function City({
 
       <div className="page-wrapper">
         <div className="container">
-          <TodaysWeather city={city} weather={dailyWeather[0]} />
+          <TodaysWeather 
+          city={city} 
+          weather={dailyWeather[0]}
+          timezone={timezone}
+          />
         </div>
       </div>
     </div>
