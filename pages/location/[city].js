@@ -5,6 +5,7 @@ import moment from 'moment-timezone';
 import TodaysWeather from '../../components/TodaysWeather';
 import HourlyWeather from '../../components/HourlyWeather';
 import WeeklyWeather from '../../components/WeeklyWeather';
+import SearchBox from '../../components/SearchBox';
 
 export async function getServerSideProps(context) {
   const city = getCity(context.params.city);
@@ -80,6 +81,12 @@ export default function City({
       <Head>
         <title>{city.name} Weather - Next.js Weather App</title>
       </Head>
+
+      <div className="page-wrapper">
+        <div className="container">
+          <SearchBox placeholder={"Search..."} />
+        </div>
+      </div>
 
       <div className="page-wrapper">
         <div className="container">
