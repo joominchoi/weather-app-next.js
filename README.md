@@ -1,1 +1,1 @@
-# Weather App - Practice Next.js project
+# Weather App - Next.js project
